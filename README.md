@@ -1,6 +1,6 @@
 # Software Lab Flask Project
 
-Basic flask project setup for running our backend.
+Basic flask project setup for running our backend. Runs as a separate server from the flask project.
 
 Setup
 ---------------
@@ -19,4 +19,3 @@ __If running the development server:__
 - Run server.py directly:
 
     ```python3 server.py```
-- Open [localhost:8080](http://localhost:8080) in a browser of your choice

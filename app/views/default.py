@@ -1,6 +1,19 @@
 from flask import Blueprint, render_template
+from flask_cors import CORS, cross_origin
 
 bp = Blueprint('test', __name__, url_prefix='/')
+
+
+@bp.route('/hwcapacity')
+@cross_origin()
+def getHwCapacity():
+    """
+    using placeholder until DB is setup
+    :return: the capacity of the hardware sets
+    """
+    return {
+        "Set 1": "5",
+    }
 
 
 @bp.route("/")

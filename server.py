@@ -1,18 +1,11 @@
 from app import app_factory
 from werkzeug.serving import run_simple
+from flask_cors import CORS
 import os
 
 application = app_factory.create_app()
-
-#returns the capacity of the hardware sets
-#using placeholder until DB is setup
-@application.route('/hwcapacity')
-def getHwCapacity():
-    return{
-        "Set 1": "5",
-    }
-
-
+cors = CORS(application)
+application.config['CORS_HEADERS'] = 'Content-Type'
 
 if __name__ == '__main__':
     run_simple(
