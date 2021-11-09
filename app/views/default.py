@@ -26,6 +26,13 @@ def getHwCapacity():
     }
 
 
+@bp.route('/get-hardware', methods=["GET"])
+def get_hardware():
+    col = mongo.db.HardwareSets
+    documents = list(col.find())
+    return jsonify(documents)
+
+
 @bp.route('/set-capacity/<id>', methods=["PATCH"])
 def set_capacity(id):
     print(set_capacity)
