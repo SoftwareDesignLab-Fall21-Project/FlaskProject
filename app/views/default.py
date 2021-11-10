@@ -76,6 +76,14 @@ def set_available(id):
             status = 500,
         )
 
+@bp.route('/get-hardware', methods=["GET"])
+def get_hardware():
+    output = []
+    for sets in mongo.db.HardwareSets.find():
+        output.append({'Name': sets['HardwareSet'], 'Capacity': sets['Capacity'], 'Available': sets['Available']})
+    return jsonify({'result' : output})
+
+
 @bp.route("/")
 def get_site():
     return render_template("site.html")
