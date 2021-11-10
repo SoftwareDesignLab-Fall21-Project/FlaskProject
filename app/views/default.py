@@ -1,10 +1,9 @@
-from flask import Flask, Blueprint, render_template, Response, jsonify
-from flask_cors import CORS, cross_origin
+from flask import Blueprint, render_template, Response, jsonify, request
+from flask_cors import cross_origin
 from bson.objectid import ObjectId
-from database import mongo
+from app.scripts import mongo
 
 bp = Blueprint('test', __name__, url_prefix='/')
-
 
 
 @bp.route('/hwcapacity', methods=["GET"])
@@ -38,50 +37,52 @@ def set_capacity(id):
     print(set_capacity)
     try:
         dbResponse = mongo.db.HardwareSets.update_one(
-            {"_id":ObjectId(id)},
-            {"$set":{"Capacity":request.form["Capacity"]}}
+            {"_id": ObjectId(id)},
+            {"$set": {"Capacity": request.form["Capacity"]}}
         )
         for attr in dir(dbResponse):
             print(f"{attr}")
         return Response(
-            response = jsonify({
-                "message":"capacity updated"
+            response=jsonify({
+                "message": "capacity updated"
             }),
-            status = 200,
+            status=200,
         )
     except Exception as ex:
         print(ex)
         return Response(
-            response = jsonify({
-                "message":"unable to update capacity"
+            response=jsonify({
+                "message": "unable to update capacity"
             }),
-            status = 500,
+            status=500,
         )
+
 
 @bp.route('/set-available/<id>', methods=["PATCH"])
 def set_available(id):
     print(set_available)
     try:
         dbResponse = mongo.db.HardwareSets.update_one(
-            {"_id":ObjectId(id)},
-            {"$set":{"Available":request.form["Available"]}}
+            {"_id": ObjectId(id)},
+            {"$set": {"Available": request.form["Available"]}}
         )
         for attr in dir(dbResponse):
             print(f"{attr}")
         return Response(
-            response = jsonify({
-                "message":"availability updated"
+            response=jsonify({
+                "message": "availability updated"
             }),
-            status = 200,
+            status=200,
         )
     except Exception as ex:
         print(ex)
         return Response(
-            response = jsonify({
-                "message":"unable to update availability"
+            response=jsonify({
+                "message": "unable to update availability"
             }),
-            status = 500,
+            status=500,
         )
+
 
 @bp.route("/")
 def get_site():
