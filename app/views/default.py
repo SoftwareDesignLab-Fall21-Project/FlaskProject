@@ -8,7 +8,7 @@ bp = Blueprint('test', __name__, url_prefix='/')
 
 @bp.route('/hwcapacity', methods=["GET"])
 @cross_origin()
-def getHwCapacity():
+def get_hw_capacity():
     """
     using placeholder until DB is setup
     :return: the capacity of the hardware sets
@@ -36,11 +36,11 @@ def get_hardware():
 def set_capacity(id):
     print(set_capacity)
     try:
-        dbResponse = mongo.db.HardwareSets.update_one(
+        db_response = mongo.db.HardwareSets.update_one(
             {"_id": ObjectId(id)},
             {"$set": {"Capacity": request.form["Capacity"]}}
         )
-        for attr in dir(dbResponse):
+        for attr in dir(db_response):
             print(f"{attr}")
         return Response(
             response=jsonify({
@@ -62,11 +62,11 @@ def set_capacity(id):
 def set_available(id):
     print(set_available)
     try:
-        dbResponse = mongo.db.HardwareSets.update_one(
+        db_response = mongo.db.HardwareSets.update_one(
             {"_id": ObjectId(id)},
             {"$set": {"Available": request.form["Available"]}}
         )
-        for attr in dir(dbResponse):
+        for attr in dir(db_response):
             print(f"{attr}")
         return Response(
             response=jsonify({
@@ -88,26 +88,3 @@ def set_available(id):
 def get_site():
     return render_template("site.html")
 
-
-@bp.route("/datasets")
-def get_datasets():
-    """ Get the valid datasets stored on this server.
-    :return: A json file containing info for all valid datasets stored on this server.
-    """
-    # TODO
-    return "{}"
-
-
-"""
-
-react client calls <flask server>/datasetList
-flask server gives list of datasets with info including names, urls, etc...
-react client makes fancy list from that
-user clicks button
-react client calls <flask server>/datasets/<selected file>
-<flask server> gives response, and response is downloaded to client computer
-
-http://192.168.18.245:8080/datasets/abdominal-and-direct-fetal-ecg-database-1.0.0.zip
-
-
-"""
