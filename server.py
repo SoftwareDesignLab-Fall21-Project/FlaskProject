@@ -1,8 +1,7 @@
 from app import app_factory
 from werkzeug.serving import run_simple
 from flask_cors import CORS
-import os
-from database import mongo
+from app.scripts import mongo
 
 application = app_factory.create_app()
 cors = CORS(application)
