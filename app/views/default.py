@@ -26,11 +26,11 @@ def getHwCapacity():
     }
 
 
-@bp.route('/get-hardware', methods=["GET"])
-def get_hardware():
-    col = mongo.db.HardwareSets
-    documents = list(col.find())
-    return jsonify(documents)
+# @bp.route('/get-hardware', methods=["GET"])
+# def get_hardware():
+#     col = mongo.db.HardwareSets
+#     documents = list(col.find())
+#     return jsonify(documents)
 
 
 @bp.route('/set-capacity/<id>', methods=["PATCH"])
@@ -83,11 +83,12 @@ def set_available(id):
             status = 500,
         )
 
+
 @bp.route('/get-hardware', methods=["GET"])
 def get_hardware():
     output = []
     for sets in mongo.db.HardwareSets.find():
-        output.append({'Name': sets['HardwareSet'], 'Capacity': sets['Capacity'], 'Available': sets['Available']})
+        output.append({'Name': sets['Name'], 'Capacity': sets['Capacity'], 'Available': sets['Available']})
     return jsonify({'result' : output})
 
 
