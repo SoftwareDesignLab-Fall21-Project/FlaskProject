@@ -16,7 +16,7 @@ except Exception as ex:
 
 if __name__ == '__main__':
     run_simple(
-        '0.0.0.0', 9999,
+        '127.0.0.1', 5000,
         application,
         # static_files=get_static_files(),
         use_reloader=True, use_debugger=True, threaded=True
