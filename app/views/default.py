@@ -4,7 +4,7 @@ from bson.objectid import ObjectId
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
 from pymongo import MongoClient
 import ssl
-from app.scripts import mongo
+from app.scripts import mongo, check_hash
 
 bp = Blueprint('test', __name__, url_prefix='/')
 
@@ -127,11 +127,8 @@ def login_page():
             if login_user:
                 message = "here"
                 hashpass = login_user['passhash']
-                if hashpass == password:
-                    # if sha256_crypt.verify(password, hashpass):
-                    # session['logged_in'] = True
-                    # session['username'] = request.form['username']
-                    return "Nice"
+                if check_hash(password, hashpass):  # if this is the correct password
+                    return "nice"
             else:
                 message = "Wrong username or password"
         return message
