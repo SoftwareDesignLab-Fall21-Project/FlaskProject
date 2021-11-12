@@ -4,10 +4,10 @@ from bson.objectid import ObjectId
 from passlib.hash import sha256_crypt
 #from MySQLdb import escape_string as thwart
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
-import logging
+from app.scripts import mongo
 import gc
-from pymongo import MongoClient
 import ssl
+from pymongo import MongoClient
 
 
 bp = Blueprint('test', __name__, url_prefix='/')
@@ -143,7 +143,7 @@ def login_page():
 
     except Exception as e:
         error = "Invalid credentials, try again." 
-        return request.form
+        return error
 
 @bp.route("/signup/", methods=["GET","POST"])
 def register_page():

@@ -1,5 +1,6 @@
 from .default import bp
 
+
 def register_blueprints(app):
     """
     :type app: flask.Flask
