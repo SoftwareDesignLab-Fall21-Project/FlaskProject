@@ -4,7 +4,7 @@ from bson.objectid import ObjectId
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
 from pymongo import MongoClient
 import ssl
-from app.scripts import mongo
+from app.scripts import mongo, check_hash
 
 bp = Blueprint('test', __name__, url_prefix='/')
 
@@ -126,27 +126,17 @@ def login_page():
     try:
         message = ''
         if request.method == 'POST':
-            username = request.form.get('username')  # access the data inside 
-            print(username)
-            password = request.form.get('password')
-            print(password)
+            username = request.form['username']  # access the data inside 
+            password = request.form['password']
 
-            # client = MongoClient(
-            #     "mongodb+srv://tbertolino:softwarelabfall2021@cluster0.mphmj.mongodb.net/SoftwareDesignLab-Fall21-Project?retryWrites=true&w=majority",
-            #     ssl=True, ssl_cert_reqs=ssl.CERT_NONE)
-            currentDB = mongo.db['SoftwareDesignLab-Fall21-Project']
-            col = currentDB['Users']
-            # col = mongo.db.Users # our collection of user information
+            col = mongo.db.Users
             login_user = col.find_one({'username': username})
-            message = login_user['username']
+
             if login_user:
+                message = "here"
                 hashpass = login_user['passhash']
-                if hashpass == password:
-                    if sha256_crypt.verify(password, hashpass):
-                        session['logged_in'] = True
-                        session['username'] = request.form['username']
-                        print("session success")
-                        return "Nice"
+                if check_hash(password, hashpass):  # if this is the correct password
+                    return "nice"
             else:
                 message = "Wrong username or password"
         return message
