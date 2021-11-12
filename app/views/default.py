@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, Response, jsonify, request
-from flask_cors import cross_origin
+from flask import Blueprint, render_template, Response, jsonify, request, current_app, send_from_directory
+from flask_cors import cross_origin, CORS
 from bson.objectid import ObjectId
 from app.scripts import mongo
 
@@ -82,9 +82,3 @@ def set_available(id):
             }),
             status=500,
         )
-
-
-@bp.route("/")
-def get_site():
-    return render_template("site.html")
-
