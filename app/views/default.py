@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template, Response, jsonify, request, flash, url_for, redirect, session, send_from_directory
+from flask import Blueprint, render_template, Response, jsonify, request, flash, url_for, redirect, session, \
+    send_from_directory
 from flask_cors import cross_origin
 from bson.objectid import ObjectId
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
@@ -92,12 +93,14 @@ def logout_user():
     session.pop("projects", None)
     return jsonify({'success': 'false'})
 
+
 @bp.route('/get-hardware', methods=["GET"])
 def get_hardware():
     output = []
     for sets in mongo.db.HardwareSets.find():
         output.append({'Name': sets['Name'], 'Capacity': sets['Capacity'], 'Available': sets['Available']})
-    return jsonify({'result' : output})
+    return jsonify({'result': output})
+
 
 @bp.route('/get-db', methods=["GET"])
 def get_db():
@@ -109,35 +112,27 @@ def get_db():
             hardware.append({'Name': sets['Name'], 'Capacity': sets['Capacity'], 'Available': sets['Available']})
         for sets in mongo.db.Projects.find():
             if user in sets['Users']:
-                projects.append({'Name': sets['Name'], 'HardwareSet1': sets['HardwareSet1'], 'HardwareSet2': sets['HardwareSet2'], 'Users' : sets['Users']})
-        return jsonify({'success': 'true', 'user' : user, 'hardware': hardware, 'projects' : projects})
+                projects.append(
+                    {'Name': sets['Name'], 'HardwareSet1': sets['HardwareSet1'], 'HardwareSet2': sets['HardwareSet2'],
+                     'Users': sets['Users']})
+        return jsonify({'success': 'true', 'user': user, 'hardware': hardware, 'projects': projects})
     else:
         return jsonify([{'success': 'false'}])
+
 
 @bp.route('/get-user', methods=["GET"])
 def get_user():
     if "user" in session:
         user = session["user"]
         projects = session["projects"]
-        return jsonify({'success': 'true', 'user' : user, 'projects': projects})
+        return jsonify({'success': 'true', 'user': user, 'projects': projects})
     else:
         return jsonify([{'success': 'false'}])
-
-        
 
 
 @bp.route("/")
 def get_site():
     return render_template("site.html")
-
-
-@bp.route("/datasets")
-def get_datasets():
-    """ Get the valid datasets stored on this server.
-    :return: A json file containing info for all valid datasets stored on this server.
-    """
-    # TODO
-    return "{}"
 
 
 class RegistrationForm(Form):
@@ -154,37 +149,31 @@ class RegistrationForm(Form):
 
 @bp.route("/login", methods=['POST'])
 def login_page():
+    if 'user' in session:
+        return "Success"
+
     try:
         message = ''
-        if request.method == 'POST':
-            username = request.form['username']  # access the data inside 
-            password = request.form['password']
+        username = request.form['username']  # access the data inside
+        password = request.form['password']
 
-            col = mongo.db.Users
-            login_user = col.find_one({'username': username})
-            print(login_user)
+        col = mongo.db.Users
+        login_user = col.find_one({'username': username})
+        print(login_user)
 
-            if login_user:
-                if sha256_crypt.verify(password, login_user['passhash']):
+        if login_user:
+            if sha256_crypt.verify(password, login_user['passhash']):
+                session["user"] = username
+                session["Projects"] = login_user['Projects']
 
-                    # session['logged_in'] = True
-                    session["user"] = username
-                    session["projects"] = login_user['Projects']
-                    flash("Logged in Successfully.")
-                    return redirect(request.referrer)
-
-                else: 
-                    message = "Wrong username or password"
-                    
-            else:
-                flash("Wrong username or password")
-
-        return redirect(request.referrer)
+                return "Success"
+        else:
+            return "Fail"
 
     except Exception as e:
+        print(e)
         print("Invalid credentials, try again.")
-        return e
-        # return redirect(request.referrer)
+        return "Fail"
 
 
 @bp.route("/signup", methods=["GET", "POST"])
@@ -197,40 +186,23 @@ def register_page():
 
             # TODO: clean incoming data to prevent injection
 
-            col = mongo.db.Users # search to check if username exists already
+            col = mongo.db.Users  # search to check if username exists already
             login_user = col.find_one({'username': username})
 
-            if login_user: 
+            if login_user:
                 msg = "That username is already taken."
                 return msg
 
-            else: 
+            else:
 
                 passhash = sha256_crypt.encrypt(str(password))
-                user = {'username': username, 'passhash': passhash, 'numCollections': 0, 'Projects': ['default']}
-                col.insert_one(user) # add this new user to the db
-                login_user = col.find_one({'username': username})
-                
-                # session['logged_in'] = True
+                user = {'username': username, 'passhash': passhash, 'Projects': [], 'numCollections': 0}
                 session["user"] = username
-                session["projects"] = login_user['Projects']
-                # return "Welcome"
-                return redirect(request.referrer)
+                session["Projects"] = login_user['Projects']
+                col.insert_one(user)  # add this new user to the db
+
+                msg = "New user registered."
+                return msg
 
     except Exception as e:
         return (str(e))
-
-
-"""
-
-react client calls <flask server>/datasetList
-flask server gives list of datasets with info including names, urls, etc...
-react client makes fancy list from that
-user clicks button
-react client calls <flask server>/datasets/<selected file>
-<flask server> gives response, and response is downloaded to client computer
-
-http://192.168.18.245:8080/datasets/abdominal-and-direct-fetal-ecg-database-1.0.0.zip
-
-
-"""

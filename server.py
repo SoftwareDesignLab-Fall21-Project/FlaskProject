@@ -19,7 +19,7 @@ if __name__ == '__main__':
 
 
     run_simple(
-        '0.0.0.0', 9090,
+        '0.0.0.0', 8080,
         application,
         # static_files=get_static_files(),
         use_reloader=True, threaded=True
