@@ -15,7 +15,7 @@ bp = Blueprint('test', __name__, url_prefix='/')
 
 @bp.route('/hwcapacity', methods=["GET"])
 @cross_origin()
-def getHwCapacity():
+def get_hw_capacity():
     """
     using placeholder until DB is setup
     :return: the capacity of the hardware sets
@@ -43,11 +43,11 @@ def get_hardware():
 def set_capacity(id):
     print(set_capacity)
     try:
-        dbResponse = mongo.db.HardwareSets.update_one(
+        db_response = mongo.db.HardwareSets.update_one(
             {"_id": ObjectId(id)},
             {"$set": {"Capacity": request.form["Capacity"]}}
         )
-        for attr in dir(dbResponse):
+        for attr in dir(db_response):
             print(f"{attr}")
         return Response(
             response=jsonify({
@@ -69,11 +69,11 @@ def set_capacity(id):
 def set_available(id):
     print(set_available)
     try:
-        dbResponse = mongo.db.HardwareSets.update_one(
+        db_response = mongo.db.HardwareSets.update_one(
             {"_id": ObjectId(id)},
             {"$set": {"Available": request.form["Available"]}}
         )
-        for attr in dir(dbResponse):
+        for attr in dir(db_response):
             print(f"{attr}")
         return Response(
             response=jsonify({
