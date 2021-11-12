@@ -121,14 +121,9 @@ def login_page():
             username = request.form['username']  # access the data inside 
             password = request.form['password']
 
-            # client = MongoClient(
-            #     "mongodb+srv://tbertolino:softwarelabfall2021@cluster0.mphmj.mongodb.net/SoftwareDesignLab-Fall21-Project?retryWrites=true&w=majority",
-            #     ssl=True, ssl_cert_reqs=ssl.CERT_NONE)
-            # currentDB = client['SoftwareDesignLab-Fall21-Project']
-            # currentDB = mongo.db['SoftwareDesignLab-Fall21-Project']
             col = mongo.db.Users
             login_user = col.find_one({'username': username})
-            # message = login_user['username']
+
             if login_user:
                 message = "here"
                 hashpass = login_user['passhash']
