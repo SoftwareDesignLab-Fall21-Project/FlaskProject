@@ -8,6 +8,7 @@ import logging
 import gc
 from pymongo import MongoClient
 import ssl
+from app.scripts import mongo
 
 
 bp = Blueprint('test', __name__, url_prefix='/')
