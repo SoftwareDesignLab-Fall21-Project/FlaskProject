@@ -118,18 +118,20 @@ def login_page():
     try:
         message = ''
         if request.method == 'POST':
-            username = request.form.get('username')  # access the data inside 
-            password = request.form.get('password')
+            username = request.form['username']  # access the data inside 
+            password = request.form['password']
 
             # client = MongoClient(
             #     "mongodb+srv://tbertolino:softwarelabfall2021@cluster0.mphmj.mongodb.net/SoftwareDesignLab-Fall21-Project?retryWrites=true&w=majority",
             #     ssl=True, ssl_cert_reqs=ssl.CERT_NONE)
+            # currentDB = client['SoftwareDesignLab-Fall21-Project']
             currentDB = mongo.db['SoftwareDesignLab-Fall21-Project']
             col = currentDB['Users']
             # col = mongo.db.Users # our collection of user information
             login_user = col.find_one({'username': username})
-            message = login_user['username']
+            # message = login_user['username']
             if login_user:
+                message = "here"
                 hashpass = login_user['passhash']
                 if hashpass == password:
                     # if sha256_crypt.verify(password, hashpass):
