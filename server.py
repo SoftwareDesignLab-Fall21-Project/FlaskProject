@@ -8,6 +8,7 @@ if __name__ == '__main__':
     from flask import send_from_directory, request
 
     application = app_factory.create_app(debug=True)
+    application.secret_key = "fadsfji-j32kjnm89adn;2+jow"
     CORS(application)
 
 
@@ -18,10 +19,10 @@ if __name__ == '__main__':
 
 
     run_simple(
-        '0.0.0.0', 8080,
+        '0.0.0.0', 9090,
         application,
         # static_files=get_static_files(),
-        use_reloader=True, use_debugger=True, threaded=True
+        use_reloader=True, threaded=True
     )
 else:
     application = app_factory.create_app()

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, Response, jsonify, request, flash, url_for, redirect, session
+from flask import Blueprint, render_template, Response, jsonify, request, flash, url_for, redirect, session, send_from_directory
 from flask_cors import cross_origin
 from bson.objectid import ObjectId
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
@@ -27,11 +27,11 @@ def get_hw_capacity():
     }
 
 
-@bp.route('/get-hardware', methods=["GET"])
-def get_hardware():
-    col = mongo.db.HardwareSets
-    documents = list(col.find())
-    return jsonify(documents)
+# @bp.route('/get-hardware', methods=["GET"])
+# def get_hardware():
+#     col = mongo.db.HardwareSets
+#     documents = list(col.find())
+#     return jsonify(documents)
 
 
 @bp.route('/set-capacity/<id>', methods=["PATCH"])
@@ -86,6 +86,46 @@ def set_available(id):
         )
 
 
+@bp.route('/logout', methods=["GET"])
+def logout_user():
+    session.pop("user", None)
+    session.pop("projects", None)
+    return jsonify({'success': 'false'})
+
+@bp.route('/get-hardware', methods=["GET"])
+def get_hardware():
+    output = []
+    for sets in mongo.db.HardwareSets.find():
+        output.append({'Name': sets['Name'], 'Capacity': sets['Capacity'], 'Available': sets['Available']})
+    return jsonify({'result' : output})
+
+@bp.route('/get-db', methods=["GET"])
+def get_db():
+    hardware = []
+    projects = []
+    if "user" in session:
+        user = session["user"]
+        for sets in mongo.db.HardwareSets.find():
+            hardware.append({'Name': sets['Name'], 'Capacity': sets['Capacity'], 'Available': sets['Available']})
+        for sets in mongo.db.Projects.find():
+            if user in sets['Users']:
+                projects.append({'Name': sets['Name'], 'HardwareSet1': sets['HardwareSet1'], 'HardwareSet2': sets['HardwareSet2'], 'Users' : sets['Users']})
+        return jsonify({'success': 'true', 'user' : user, 'hardware': hardware, 'projects' : projects})
+    else:
+        return jsonify([{'success': 'false'}])
+
+@bp.route('/get-user', methods=["GET"])
+def get_user():
+    if "user" in session:
+        user = session["user"]
+        projects = session["projects"]
+        return jsonify({'success': 'true', 'user' : user, 'projects': projects})
+    else:
+        return jsonify([{'success': 'false'}])
+
+        
+
+
 @bp.route("/")
 def get_site():
     return render_template("site.html")
@@ -122,21 +162,25 @@ def login_page():
 
             col = mongo.db.Users
             login_user = col.find_one({'username': username})
+            print(login_user)
 
             if login_user:
                 if sha256_crypt.verify(password, login_user['passhash']):
 
                     # session['logged_in'] = True
                     # session['username'] = request.form['username']
-                
-                    return "nice"
+                    session["user"] = username
+                    session["projects"] = login_user['Projects']
+                    
+                    return redirect(request.referrer)                    
+                    
             else:
                 message = "Wrong username or password"
         return message
 
     except Exception as e:
-        error = "Invalid credentials, try again."
-        return str(e)
+        print("Invalid credentials, try again.")
+        return redirect(request.referrer)
 
 
 @bp.route("/signup", methods=["GET", "POST"])
