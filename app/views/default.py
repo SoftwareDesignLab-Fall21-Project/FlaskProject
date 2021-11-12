@@ -94,6 +94,15 @@ def get_hardware():
         output.append({'Name': sets['Name'], 'Capacity': sets['Capacity'], 'Available': sets['Available']})
     return jsonify({'result' : output})
 
+@bp.route('/get-user', methods=["GET"])
+def get_user():
+    if "user" in session:
+        user = session["user"]
+        projects = session["projects"]
+        return jsonify({'success': 'true', 'user' : user, 'projects': projects})
+    else:
+        return jsonify([{'success': 'false'}])
+
 
 @bp.route("/")
 def get_site():
@@ -131,12 +140,16 @@ def login_page():
 
             col = mongo.db.Users
             login_user = col.find_one({'username': username})
+            print(login_user)
 
             if login_user:
                 message = "here"
                 hashpass = login_user['passhash']
-                if check_hash(password, hashpass):  # if this is the correct password
-                    return "nice"
+                print(request.referrer)
+                if password == hashpass:  # if this is the correct password
+                    session["user"] = username
+                    session["projects"] = login_user['Projects']
+                    return redirect(request.referrer)
             else:
                 message = "Wrong username or password"
         return message
