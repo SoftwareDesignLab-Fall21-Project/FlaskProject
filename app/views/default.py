@@ -89,9 +89,8 @@ def set_available(id):
 
 @bp.route('/logout', methods=["GET"])
 def logout_user():
-    session.pop("user", None)
-    session.pop("projects", None)
-    return jsonify({'success': 'false'})
+    session.clear()
+    return jsonify({'success': 'true'})
 
 
 @bp.route('/get-hardware', methods=["GET"])
@@ -172,37 +171,35 @@ def login_page():
 
     except Exception as e:
         print(e)
-        print("Invalid credentials, try again.")
         return "Fail"
 
 
-@bp.route("/signup", methods=["GET", "POST"])
+@bp.route("/register", methods=["POST"])
 def register_page():
     try:
 
-        if request.method == "POST":
-            username = request.form['newuser']  # access the data inside 
-            password = request.form['newpass']
+        username = request.form['newuser']  # access the data inside
+        password = request.form['newpass']
 
-            # TODO: clean incoming data to prevent injection
+        # TODO: clean incoming data to prevent injection
 
-            col = mongo.db.Users  # search to check if username exists already
-            login_user = col.find_one({'username': username})
+        col = mongo.db.Users  # search to check if username exists already
+        login_user = col.find_one({'username': username})
 
-            if login_user:
-                msg = "That username is already taken."
-                return msg
+        if login_user:
+            msg = "That username is already taken."
+            return msg
 
-            else:
+        else:
 
-                passhash = sha256_crypt.encrypt(str(password))
-                user = {'username': username, 'passhash': passhash, 'Projects': [], 'numCollections': 0}
-                session["user"] = username
-                session["Projects"] = login_user['Projects']
-                col.insert_one(user)  # add this new user to the db
+            passhash = sha256_crypt.encrypt(str(password))
+            user = {'username': username, 'passhash': passhash, 'Projects': [], 'numCollections': 0}
+            session["user"] = username
+            session["Projects"] = login_user['Projects']
+            col.insert_one(user)  # add this new user to the db
 
-                msg = "New user registered."
-                return msg
+            msg = "New user registered."
+            return msg
 
     except Exception as e:
         return (str(e))
