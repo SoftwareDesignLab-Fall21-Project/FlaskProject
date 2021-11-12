@@ -1,15 +1,10 @@
 from flask import Blueprint, render_template, Response, jsonify, request, flash, url_for, redirect, session
 from flask_cors import cross_origin
 from bson.objectid import ObjectId
-from passlib.hash import sha256_crypt
-#from MySQLdb import escape_string as thwart
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
-import logging
-import gc
 from pymongo import MongoClient
 import ssl
 from app.scripts import mongo
-
 
 bp = Blueprint('test', __name__, url_prefix='/')
 
@@ -116,25 +111,28 @@ def get_datasets():
 
 class RegistrationForm(Form):
     username = StringField('Username', [validators.Length(min=4, max=20)])
-    #email = StringField('Email Address', [validators.Length(min=6, max=50)])
+    # email = StringField('Email Address', [validators.Length(min=6, max=50)])
     password = PasswordField('New Password', [
         validators.DataRequired(),
         validators.EqualTo('confirm', message='Passwords must match')
     ])
     confirm = PasswordField('Repeat Password')
-    accept_tos = BooleanField('I accept the Terms of Service and Privacy Notice (updated Jan 22, 2015)', [validators.InputRequired()])
+    accept_tos = BooleanField('I accept the Terms of Service and Privacy Notice (updated Jan 22, 2015)',
+                              [validators.InputRequired()])
+
 
 @bp.route("/login", methods=['POST'])
 def login_page():
-    
-    try: 
+    try:
         message = ''
         if request.method == 'POST':
             username = request.form.get('username')  # access the data inside 
             password = request.form.get('password')
 
-            client = MongoClient("mongodb+srv://tbertolino:softwarelabfall2021@cluster0.mphmj.mongodb.net/SoftwareDesignLab-Fall21-Project?retryWrites=true&w=majority", ssl=True, ssl_cert_reqs=ssl.CERT_NONE)
-            currentDB = client['SoftwareDesignLab-Fall21-Project']
+            # client = MongoClient(
+            #     "mongodb+srv://tbertolino:softwarelabfall2021@cluster0.mphmj.mongodb.net/SoftwareDesignLab-Fall21-Project?retryWrites=true&w=majority",
+            #     ssl=True, ssl_cert_reqs=ssl.CERT_NONE)
+            currentDB = mongo.db['SoftwareDesignLab-Fall21-Project']
             col = currentDB['Users']
             # col = mongo.db.Users # our collection of user information
             login_user = col.find_one({'username': username})
@@ -142,7 +140,7 @@ def login_page():
             if login_user:
                 hashpass = login_user['passhash']
                 if hashpass == password:
-                #if sha256_crypt.verify(password, hashpass):
+                    # if sha256_crypt.verify(password, hashpass):
                     # session['logged_in'] = True
                     # session['username'] = request.form['username']
                     return "Nice"
@@ -151,21 +149,18 @@ def login_page():
         return message
 
     except Exception as e:
-        error = "Invalid credentials, try again." 
+        error = "Invalid credentials, try again."
         return request.form
 
-@bp.route("/signup/", methods=["GET","POST"])
+
+@bp.route("/signup/", methods=["GET", "POST"])
 def register_page():
     try:
 
         if request.method == "POST":
             username = request.form.get("newuser")
-            password = request.form.get("newpass") 
+            password = request.form.get("newpass")
             # password = sha256_crypt.encrypt((str(form.password.data)))
-            
-            
-
-
 
             # if int(x) > 0:
             #     flash("That username is already taken, please choose another")
@@ -174,7 +169,7 @@ def register_page():
             # else:
             #     c.execute("INSERT INTO users (username, password, email, tracking) VALUES (%s, %s, %s, %s)",
             #               (thwart(username), thwart(password), thwart(email), thwart("/introduction-to-python-programming/")))
-                
+
             #     conn.commit()
             #     flash("Thanks for registering!")
             #     c.close()
@@ -184,7 +179,7 @@ def register_page():
             #     session['logged_in'] = True
             #     session['username'] = username
 
-                # return redirect(url_for('dashboard'))
+            # return redirect(url_for('dashboard'))
 
         # return a template for the login form if we receive a GET request
         # return render_template("register.html", form=form)
@@ -192,7 +187,8 @@ def register_page():
         return redirect(url_for('test'))
 
     except Exception as e:
-        return(str(e))
+        return (str(e))
+
 
 """
 
