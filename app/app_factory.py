@@ -1,11 +1,7 @@
-import logging
-
-from flask import Flask, url_for
-from . import views
-from werkzeug.middleware.shared_data import SharedDataMiddleware
 import os
-from flask_cors import CORS
+from flask import Flask
 from app.scripts import mongo
+from . import views
 
 
 def create_app(debug=False):
