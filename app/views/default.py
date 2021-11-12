@@ -124,8 +124,8 @@ def get_db():
 def get_user():
     if "user" in session:
         user = session["user"]
-        projects = session["projects"]
-        return jsonify({'success': 'true', 'user': user, 'projects': projects})
+        projects = session["Projects"]
+        return jsonify({'success': 'true', 'user': user, 'Projects': projects})
     else:
         return jsonify([{'success': 'false'}])
 
@@ -149,9 +149,9 @@ class RegistrationForm(Form):
 
 @bp.route("/login", methods=['POST'])
 def login_page():
-    if 'user' in session:
-        return "Success"
-
+    # if 'user' in session:
+    #     return "Success"
+    session.clear()
     try:
         message = ''
         username = request.form['username']  # access the data inside

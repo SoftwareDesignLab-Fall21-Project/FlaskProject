@@ -1,6 +1,6 @@
 from app import app_factory
 from werkzeug.serving import run_simple
-
+import os
 application = None
 
 if __name__ == '__main__':
@@ -11,6 +11,7 @@ if __name__ == '__main__':
     application.secret_key = "fadsfji-j32kjnm89adn;2+jow"
     CORS(application)
 
+    application.secret_key = os.urandom(32)
 
     @application.route("/datasets/dump.json", methods=["GET"])
     @cross_origin()
