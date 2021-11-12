@@ -2,8 +2,7 @@ from flask import Blueprint, render_template, Response, jsonify, request, flash,
 from flask_cors import cross_origin
 from bson.objectid import ObjectId
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
-from pymongo import MongoClient
-import ssl
+from passlib.hash import sha256_crypt
 from app.scripts import mongo, check_hash
 
 bp = Blueprint('test', __name__, url_prefix='/')
@@ -125,9 +124,11 @@ def login_page():
             login_user = col.find_one({'username': username})
 
             if login_user:
-                message = "here"
-                hashpass = login_user['passhash']
-                if check_hash(password, hashpass):  # if this is the correct password
+                if sha256_crypt.verify(password, login_user['passhash']):
+
+                    # session['logged_in'] = True
+                    # session['username'] = request.form['username']
+                
                     return "nice"
             else:
                 message = "Wrong username or password"
@@ -135,41 +136,36 @@ def login_page():
 
     except Exception as e:
         error = "Invalid credentials, try again."
-        return request.form
+        return str(e)
 
 
-@bp.route("/signup/", methods=["GET", "POST"])
+@bp.route("/signup", methods=["GET", "POST"])
 def register_page():
     try:
 
         if request.method == "POST":
-            username = request.form.get("newuser")
-            password = request.form.get("newpass")
-            # password = sha256_crypt.encrypt((str(form.password.data)))
+            username = request.form['newuser']  # access the data inside 
+            password = request.form['newpass']
 
-            # if int(x) > 0:
-            #     flash("That username is already taken, please choose another")
-            #     return render_template('register.html', form=form)
+            # TODO: clean incoming data to prevent injection
 
-            # else:
-            #     c.execute("INSERT INTO users (username, password, email, tracking) VALUES (%s, %s, %s, %s)",
-            #               (thwart(username), thwart(password), thwart(email), thwart("/introduction-to-python-programming/")))
+            col = mongo.db.Users # search to check if username exists already
+            login_user = col.find_one({'username': username})
 
-            #     conn.commit()
-            #     flash("Thanks for registering!")
-            #     c.close()
-            #     conn.close()
-            #     gc.collect()
+            if login_user: 
+                msg = "That username is already taken."
+                return msg
 
-            #     session['logged_in'] = True
-            #     session['username'] = username
+            else: 
 
-            # return redirect(url_for('dashboard'))
+                passhash = sha256_crypt.encrypt(str(password))
+                user = {'username': username, 'passhash': passhash}
+                col.insert_one(user) # add this new user to the db
+                # session['logged_in'] = True
+                # session['username'] = username
 
-        # return a template for the login form if we receive a GET request
-        # return render_template("register.html", form=form)
-        # flash("Thanks for registering!")
-        return redirect(url_for('test'))
+                msg = "New user registered."
+                return msg
 
     except Exception as e:
         return (str(e))

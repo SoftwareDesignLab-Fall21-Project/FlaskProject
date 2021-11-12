@@ -19,7 +19,7 @@ def create_app(debug=False):
 
     try:
         app.config['MONGO_URI'] = "mongodb+srv://tbertolino:softwarelabfall2021@cluster0.mphmj.mongodb.net" \
-                                  "/SoftwareDesignLab-Fall21-Project?retryWrites=true&w=majority "
+                                  "/SoftwareDesignLab-Fall21-Project?retryWrites=true&w=majority"
         mongo.init_app(app)
     except ValueError as ex:
         print("*****ERRROR DATABASE*****")
