@@ -87,6 +87,12 @@ def set_available(id):
         )
 
 
+@bp.route('/logout', methods=["GET"])
+def logout_user():
+    session.pop("user", None)
+    session.pop("projects", None)
+    return jsonify({'success': 'false'})
+
 @bp.route('/get-hardware', methods=["GET"])
 def get_hardware():
     output = []
@@ -102,6 +108,8 @@ def get_user():
         return jsonify({'success': 'true', 'user' : user, 'projects': projects})
     else:
         return jsonify([{'success': 'false'}])
+
+        
 
 
 @bp.route("/")
