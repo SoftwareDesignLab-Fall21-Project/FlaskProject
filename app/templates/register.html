@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>New User Registration Form</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="shortcut icon" href="../static/img/favicon.ico">
+    <script defer src='../static/js/FileSaver.min.js' type="text/javascript"></script>
+</head>
+<body>
+    <div>
+        <Card className="sign-in-dialog">
+            <CardContent>
+                <h4>New User?</h4>
+                {% from "_formhelpers.html" import render_field %}
+                <form method=post>
+                <dl>
+                    {{ render_field(form.username) }}
+                    {{ render_field(form.email) }}
+                    {{ render_field(form.password) }}
+                    {{ render_field(form.confirm) }}
+                    {{ render_field(form.accept_tos) }}
+                </dl>
+                <p><input type=submit value=Register>
+                </form>
+            </CardContent>
+        </Card>
+    </div>
+</body>
+</html>
