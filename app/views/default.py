@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, Response, jsonify, request, flash, url_for, redirect, session
+from flask import Blueprint, render_template, Response, jsonify, request, flash, url_for, redirect, session, send_from_directory
 from flask_cors import cross_origin
 from bson.objectid import ObjectId
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
@@ -127,7 +127,9 @@ def login_page():
         message = ''
         if request.method == 'POST':
             username = request.form.get('username')  # access the data inside 
+            print(username)
             password = request.form.get('password')
+            print(password)
 
             # client = MongoClient(
             #     "mongodb+srv://tbertolino:softwarelabfall2021@cluster0.mphmj.mongodb.net/SoftwareDesignLab-Fall21-Project?retryWrites=true&w=majority",
@@ -140,17 +142,18 @@ def login_page():
             if login_user:
                 hashpass = login_user['passhash']
                 if hashpass == password:
-                    # if sha256_crypt.verify(password, hashpass):
-                    # session['logged_in'] = True
-                    # session['username'] = request.form['username']
-                    return "Nice"
+                    if sha256_crypt.verify(password, hashpass):
+                        session['logged_in'] = True
+                        session['username'] = request.form['username']
+                        print("session success")
+                        return "Nice"
             else:
                 message = "Wrong username or password"
         return message
 
     except Exception as e:
-        error = "Invalid credentials, try again."
-        return request.form
+        print("Invalid credentials, try again.")
+        return redirect(request.referrer)
 
 
 @bp.route("/signup/", methods=["GET", "POST"])
