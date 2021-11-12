@@ -195,7 +195,7 @@ def register_page():
             passhash = sha256_crypt.encrypt(str(password))
             user = {'username': username, 'passhash': passhash, 'Projects': [], 'numCollections': 0}
             session["user"] = username
-            session["Projects"] = login_user['Projects']
+            session["Projects"] = []
             col.insert_one(user)  # add this new user to the db
 
             msg = "New user registered."
