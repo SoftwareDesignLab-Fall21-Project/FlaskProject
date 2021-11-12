@@ -168,19 +168,23 @@ def login_page():
                 if sha256_crypt.verify(password, login_user['passhash']):
 
                     # session['logged_in'] = True
-                    # session['username'] = request.form['username']
                     session["user"] = username
                     session["projects"] = login_user['Projects']
-                    
-                    return redirect(request.referrer)                    
+                    flash("Logged in Successfully.")
+                    return redirect(request.referrer)
+
+                else: 
+                    message = "Wrong username or password"
                     
             else:
-                message = "Wrong username or password"
-        return message
+                flash("Wrong username or password")
+
+        return redirect(request.referrer)
 
     except Exception as e:
         print("Invalid credentials, try again.")
-        return redirect(request.referrer)
+        return e
+        # return redirect(request.referrer)
 
 
 @bp.route("/signup", methods=["GET", "POST"])
@@ -203,13 +207,15 @@ def register_page():
             else: 
 
                 passhash = sha256_crypt.encrypt(str(password))
-                user = {'username': username, 'passhash': passhash}
+                user = {'username': username, 'passhash': passhash, 'numCollections': 0, 'Projects': ['default']}
                 col.insert_one(user) # add this new user to the db
+                login_user = col.find_one({'username': username})
+                
                 # session['logged_in'] = True
-                # session['username'] = username
-
-                msg = "New user registered."
-                return msg
+                session["user"] = username
+                session["projects"] = login_user['Projects']
+                # return "Welcome"
+                return redirect(request.referrer)
 
     except Exception as e:
         return (str(e))
