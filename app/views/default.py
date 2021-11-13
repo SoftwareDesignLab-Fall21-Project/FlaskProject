@@ -224,6 +224,7 @@ def register_page():
             user = {'username': username, 'passhash': passhash, 'Projects': [], 'numCollections': 0}
             session["user"] = username
             session["Projects"] = user['Projects']
+            session["Projects"] = []
             col.insert_one(user)  # add this new user to the db
 
             msg = "New user registered."
