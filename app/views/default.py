@@ -124,10 +124,38 @@ def get_user():
     if "user" in session:
         user = session["user"]
         projects = session["Projects"]
+        print(user)
         return jsonify({'success': 'true', 'user': user, 'Projects': projects})
     else:
         return jsonify([{'success': 'false'}])
 
+
+@bp.route("/create-project", methods=["POST"])
+def create_project():
+    try:
+
+        projectName = request.form['projectName']  # access the data inside
+
+        # TODO: clean incoming data to prevent injection
+
+        col = mongo.db.Projects  # search to check if username exists already
+        isAlreadyMade = col.find_one({'Name': projectName})
+
+        if isAlreadyMade:
+            msg = "That project name is already taken."
+            return msg
+
+        else:
+
+            user = session["user"]
+            project = {'Name': projectName, 'HardwareSet1': "0", 'HardwareSet2': "0", 'Users': [user]}
+            col.insert_one(project)  # add this new user to the db
+
+            msg = "New project created."
+            return msg
+
+    except Exception as e:
+        return (str(e))
 
 @bp.route("/")
 def get_site():
@@ -195,7 +223,7 @@ def register_page():
             passhash = sha256_crypt.encrypt(str(password))
             user = {'username': username, 'passhash': passhash, 'Projects': [], 'numCollections': 0}
             session["user"] = username
-            session["Projects"] = login_user['Projects']
+            session["Projects"] = user['Projects']
             col.insert_one(user)  # add this new user to the db
 
             msg = "New user registered."
