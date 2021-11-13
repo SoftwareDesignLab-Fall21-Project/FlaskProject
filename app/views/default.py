@@ -87,6 +87,86 @@ def set_available(id):
         )
 
 
+@bp.route("/checkout-hw", methods=["POST"])
+def checkout_hw():
+    try:
+        if "user" in session:
+            project_name = request.form['project_name']
+            hw_name = request.form['hw_name']
+            number = int(request.form['number'])
+            if number < 1:
+                raise ValueError
+
+            user = mongo.db.Users.find_one({'username': session["user"]})
+            if user is None or project_name not in user["Projects"]:
+                return jsonify([{'success': 'false', 'reason': "User authentication failed, reload the page."}])
+
+            project = mongo.db.Projects.find_one({'Name': project_name})
+            if project is None:
+                return jsonify([{'success': 'false', 'reason': "Project doesn't exist."}])
+
+            hw_set = mongo.db.HardwareSets.find_one({'Name': hw_name})
+            if hw_set is None or int(hw_set['Available']) < number:
+                return jsonify([{'success': 'false', 'reason': "Bad number of stuff."}])
+
+            mongo.db.Projects.update_one(
+                {"_id": project["_id"]},
+                {"$set": {hw_name: (int(project[hw_name]) + number)}}
+            )
+
+            mongo.db.HardwareSets.update_one(
+                {"_id": hw_set["_id"]},
+                {"$set": {"Available": (int(hw_set["Available"]) - number)}}
+            )
+
+            return jsonify([{'success': 'true'}])
+    except ValueError as e:
+        print(e)
+        return jsonify([{'success': 'false'}])
+
+    return jsonify([{'success': 'false'}])
+
+
+@bp.route("/return-hw", methods=["POST"])
+def return_hw():
+    try:
+        if "user" in session:
+            project_name = request.form['project_name']
+            hw_name = request.form['hw_name']
+            number = int(request.form['number'])
+            if number < 1:
+                raise ValueError
+
+            user = mongo.db.Users.find_one({'username': session["user"]})
+            if user is None or project_name not in user["Projects"]:
+                return jsonify([{'success': 'false', 'reason': "User authentication failed, reload the page."}])
+
+            project = mongo.db.Projects.find_one({'Name': project_name})
+            if project is None or int(project[hw_name]) < number:
+                return jsonify([{'success': 'false', 'reason': "Bad number of stuff."}])
+
+            hw_set = mongo.db.HardwareSets.find_one({'Name': hw_name})
+            if hw_set is None:
+                return jsonify([{'success': 'false', 'reason': "Hardware set doesn't exist."}])
+
+            mongo.db.Projects.update_one(
+                {"_id": project["_id"]},
+                {"$set": {hw_name: (int(project[hw_name]) - number)}}
+            )
+
+            mongo.db.HardwareSets.update_one(
+                {"_id": hw_set["_id"]},
+                {"$set": {"Available": (int(hw_set["Available"]) + number)}}
+            )
+
+            return jsonify([{'success': 'true'}])
+    except ValueError as e:
+        print(e)
+        return jsonify([{'success': 'false'}])
+
+    return jsonify([{'success': 'false'}])
+
+
 @bp.route('/logout', methods=["GET"])
 def logout_user():
     session.clear()
@@ -130,36 +210,62 @@ def get_user():
         return jsonify([{'success': 'false'}])
 
 
+# @bp.route('/create-project', methods=['POST'])
+# def create_project():
+#     if "user" in session:
+#         project_name = request.form["project_name"]
+#         project_description = request.form["project_description"]
+#         project_id = request.form["project_id"]
+#         user = mongo.db.Users.find_one({'username': session["user"]})
+#
+#         if user is None:
+#             return jsonify([{'success': 'false', 'reason': 'Authentication error', 'error_no': 1}])
+#
+#         projects = user["Projects"]
+#         if project_name in projects:
+#             return jsonify([{'success': 'false', 'reason': 'Project exists', 'error_no': 2}])
+#
+#
+#
+#         return jsonify([{'success': 'true', 'reason': 'Project already exists', 'error_no': 0}])
+#     else:
+#         return jsonify([{'success': 'false', 'reason': 'Project already exists', 'error_no': -1}])
+
 @bp.route("/create-project", methods=["POST"])
 def create_project():
-    try:
+    if "user" not in session:
+        return jsonify([{'success': 'false'}])
 
-        projectName = request.form['projectName']  # access the data inside
+    try:
+        project_name = request.form['project_name']  # access the data inside
+        project_description = request.form['project_description']
+        project_id = request.form['project_id']
 
         # TODO: clean incoming data to prevent injection
 
-        col = mongo.db.Projects  # search to check if username exists already
-        isAlreadyMade = col.find_one({'Name': projectName})
+        col = mongo.db.Projects
+        is_already_made = col.find_one({'Name': project_name})
+        user = mongo.db.Users.find_one({'username': session["user"]})
 
-        if isAlreadyMade:
-            msg = "That project name is already taken."
-            return msg
+        if user is None:
+            return jsonify([{'success': 'false', 'reason': "User authentication failed, reload the page."}])
 
+        if is_already_made:
+            return jsonify([{'success': 'false', 'reason': "That project name is already taken."}])
         else:
-
-            user = session["user"]
-            project = {'Name': projectName, 'HardwareSet1': "0", 'HardwareSet2': "0", 'Users': [user]}
+            project = {'Name': project_name, 'HardwareSet1': "0", 'HardwareSet2': "0", 'Users': [session["user"]]}
             col.insert_one(project)  # add this new user to the db
 
-            msg = "New project created."
-            return msg
+            db_response = mongo.db.Users.update_one(
+                {"_id": ObjectId(user["_id"])},
+                {"$push": {"Projects": project_name}}
+            )
+            return jsonify([{'success': 'true'}])
 
     except Exception as e:
-        return (str(e))
+        print(e)
+        return jsonify([{'success': 'false', 'reason': "Internal error."}])
 
-@bp.route("/")
-def get_site():
-    return render_template("site.html")
 
 
 class RegistrationForm(Form):

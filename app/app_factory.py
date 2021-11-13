@@ -10,6 +10,8 @@ def create_app(debug=False):
     :return: A Flask instance which can be used by a WSGI application.
     """
     app = Flask(__name__,
+                static_folder="./../build",
+                static_url_path='/',
                 instance_relative_config=True)
 
     try:
